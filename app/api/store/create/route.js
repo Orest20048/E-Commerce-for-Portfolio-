@@ -3,7 +3,34 @@ import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Create a Store
+// ✅ GET: Check if user already has a store (used by your fetchSellerStatus)
+export async function GET(request) {
+  try {
+    const { userId } = getAuth(request);
+
+    if (!userId) {
+      return NextResponse.json({ error: "Not authorized" }, { status: 401 });
+    }
+
+    // Check if user already has a store
+    const store = await prisma.store.findFirst({ where: { userId } });
+
+    if (store) {
+      return NextResponse.json({ status: store.status }, { status: 200 });
+    }
+
+    // No store found
+    return NextResponse.json({ status: "not_registered" }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// ✅ POST: Create a new store (used when submitting the form)
 export async function POST(request) {
   try {
     // 1️⃣ Authenticate user via Clerk
@@ -29,14 +56,13 @@ export async function POST(request) {
 
     // 4️⃣ Ensure the Clerk user exists in your database
     let user = await prisma.user.findUnique({ where: { id: userId } });
-
     if (!user) {
       user = await prisma.user.create({
         data: {
           id: userId,
           email,
-          name: username, // you can replace with actual full name if available
-          image: "https://placehold.co/100x100?text=User", // ✅ FIX: added image to prevent Prisma error
+          name: username,
+          image: "https://placehold.co/100x100?text=User", // placeholder fix
         },
       });
     }
@@ -44,7 +70,7 @@ export async function POST(request) {
     // 5️⃣ Check if this user already has a store
     const existingStore = await prisma.store.findFirst({ where: { userId } });
     if (existingStore) {
-      return NextResponse.json({ status: existingStore.status });
+      return NextResponse.json({ status: existingStore.status }, { status: 200 });
     }
 
     // 6️⃣ Check if username is already taken
@@ -83,6 +109,7 @@ export async function POST(request) {
         contact,
         address,
         logo: optimizedImage,
+        status: "pending", // optional: default status
       },
     });
 
