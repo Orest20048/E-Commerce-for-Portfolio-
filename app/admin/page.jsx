@@ -6,10 +6,11 @@ import { useAuth } from "@clerk/nextjs"
 import axios from "axios"
 import { CircleDollarSignIcon, ShoppingBasketIcon, StoreIcon, TagsIcon } from "lucide-react"
 import { useEffect, useState } from "react"
+import toast from "react-hot-toast"
 
 export default function AdminDashboard() {
 
-    const {getToken} = useAuth
+    const {getToken} = useAuth()
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$'
 
@@ -33,11 +34,14 @@ export default function AdminDashboard() {
         try {
             const token = await getToken()
             const {data} = await axios.get('/api/admin/dashboard', {
-                
+                headers:{Authorization: `Bearer ${token}`}
+
             })
+            setDashboardData(data.dashboardData)
         } catch (error) {
-            
+            toast.error(error?.response?.data?.error || error.message)
         }
+        setLoading(false)
     }
 
     useEffect(() => {
