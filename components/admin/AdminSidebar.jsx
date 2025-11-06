@@ -5,8 +5,11 @@ import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon } from "lucide-
 import Image from "next/image"
 import Link from "next/link"
 import { assets } from "@/assets/assets"
+import { useUser } from "@clerk/nextjs"
 
 const AdminSidebar = () => {
+
+    const{user} =useUser()
 
     const pathname = usePathname()
 
