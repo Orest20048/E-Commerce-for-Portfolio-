@@ -16,10 +16,10 @@ export default function AdminDashboard() {
 
     const [loading, setLoading] = useState(true)
     const [dashboardData, setDashboardData] = useState({
-        products: 0,
-        revenue: 0,
-        orders: 0,
-        stores: 0,
+        products: 3,
+        revenue: 2400,
+        orders: 4,
+        stores: 6,
         allOrders: [],
     })
 
